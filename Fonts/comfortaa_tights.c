@@ -2208,9 +2208,3 @@ FONT_INFO comfortaa_14ptFontInfo1 =
 	comfortaa_14ptDescriptors, //  Character descriptor array
 	comfortaa1_14ptBitmaps
 };
-
-sFONT Comfortaa14_1 = {
-		comfortaa1_14ptBitmaps,
-		18, /* Width */
-		20, /* Height */
-};
