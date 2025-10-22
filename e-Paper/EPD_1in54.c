@@ -6,14 +6,14 @@
 *----------------
 * |	This version:   V2.0
 * | Date        :   2018-10-30
-* | Info        :   
+* | Info        :
 * 1.Remove:ImageBuff[EPD_HEIGHT * EPD_WIDTH / 8]
 * 2.Change:EPD_Display(UBYTE *Image)
 *   Need to pass parameters: pointer to cached data
 * 3.Change:
-*   EPD_RST -> EPD_RST_PIN
-*   EPD_DC -> EPD_DC_PIN
-*   EPD_CS -> EPD_CS_PIN
+*   EPD_RST  -> EPD_RST_PIN
+*   EPD_DC   -> EPD_DC_PIN
+*   EPD_CS   -> EPD_CS_PIN
 *   EPD_BUSY -> EPD_BUSY_PIN
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,6 +51,12 @@ const unsigned char lut_partial_update[] = {
     0x00, 0x00, 0x00, 0x00, 0x13, 0x14, 0x44, 0x12,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+
+extern SPI_HandleTypeDef hspi1;
+void DEV_SPI_WriteByte(UBYTE value)
+{
+	HAL_SPI_Transmit(&hspi1, &value, 1, 1000);
+}
 
 /******************************************************************************
 function :	Software reset

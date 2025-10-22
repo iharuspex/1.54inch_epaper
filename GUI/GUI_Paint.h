@@ -16,21 +16,21 @@
 * 2.add: Paint_SelectImage()
 *    Select the picture to be drawn
 * 3.add: Paint_SetRotate()
-*    Set the direction of the cache    
-* 4.add: Paint_RotateImage() 
-*    Can flip the picture, Support 0-360 degrees, 
+*    Set the direction of the cache
+* 4.add: Paint_RotateImage()
+*    Can flip the picture, Support 0-360 degrees,
 *    but only 90.180.270 rotation is better
-* 4.add: Paint_SetMirroring() 
+* 4.add: Paint_SetMirroring()
 *    Can Mirroring the picture, horizontal, vertical, origin
-* 5.add: Paint_DrawString_CN() 
-*    Can display Chinese(GB1312)    
+* 5.add: Paint_DrawString_CN()
+*    Can display Chinese(GB1312)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documnetation files (the "Software"), to deal
+* of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to  whom the Software is
-* furished to do so, subject to the following conditions:
+* furnished to do so, subject to the following conditions:
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
@@ -48,7 +48,7 @@
 #define __GUI_PAINT_H
 
 #include "epaper.h"
-#include "../Fonts/fonts.h"
+#include "fonts.h"
 
 /**
  * Image attributes

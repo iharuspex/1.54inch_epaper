@@ -1,7 +1,7 @@
 /**
   * | File     :   fonts.h
-  * | Author   :   Artem Paraev (iharuspex)
-  * | Function :   Font definitions 
+  * | Author   :   Artem Paraev
+  * | Function :   Font definitions
 
   * Copyright (c) 2019 Artem Paraev
 
@@ -29,12 +29,12 @@
 #define __FONTS_H
 
 /* (32x41) */
-#define MAX_HEIGHT_FONT         41
-#define MAX_WIDTH_FONT          32
-#define OFFSET_BITMAP           
+#define MAX_HEIGHT_FONT 41
+#define MAX_WIDTH_FONT  32
+#define OFFSET_BITMAP
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -50,7 +50,6 @@ typedef struct FontTable
 {
     uint16_t      width;                      // Char width
     uint16_t      start;                      // First char's byte index
-
 } FONT_CHAR_INFO;
 
 typedef struct
@@ -58,7 +57,7 @@ typedef struct
     uint8_t       Height;                     // Char height
     uint8_t       FirstChar;                  // First char's index
     uint8_t       LastChar;                   // Last char's index
-    //uint8_t       FontSpace;                  // Space between chars
+    // uint8_t       FontSpace;                  // Space between chars
     const         FONT_CHAR_INFO *FontTable;  // Fonts descriptor
     const uint8_t *FontBitmaps;               // Fonts array
 } FONT_INFO;
@@ -68,5 +67,5 @@ extern FONT_INFO comfortaa_14ptFontInfo1;
 #ifdef __cplusplus
 }
 #endif
-  
+
 #endif /* __FONTS_H */
