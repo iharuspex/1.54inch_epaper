@@ -1,0 +1,95 @@
+$(start_block_header)
+#include <stdint.h>
+
+#include "fonts.h"
+
+/*
+
+// Character's info struct.
+typedef struct FontTable {
+  uint16_t    width; // Character's width.
+  uint16_t    start; // Index of first character's byte.
+} FONT_CHAR_INFO;
+
+// Font's info struct.
+typedef struct
+{
+  uint8_t Height;                  // Character's height.
+  uint8_t FirstChar;               // First character.
+  uint8_t LastChar;                // Last character.
+  uint8_t FontSpace;               // Width of space character.
+  const FONT_CHAR_INFO *FontTable; // Character descriptor array
+  const uint8_t *FontBitmaps;      // Character bitmap array
+} FONT_INFO;
+
+*/
+$(end_block_header)
+
+//
+//  Font data for $(fnt_family) $(fnt_size)pt
+//
+
+// Character bitmaps for $(fnt_family) $(fnt_size)pt
+const uint$(img_data_block_size)_t $(doc_name_ws)_bitmaps[] = {
+$(start_block_images_table)
+    // at $(out_char_offset) '$(out_char_text)' #$(out_char_code)h ($(out_image_width) pixel(s) wide)
+    $(out_image_preview)
+    $(out_image_data)
+#if ($(out_image_height) > 1)
+    $(out_comma)
+#endif
+$(end_block_images_table)
+};
+
+// Character descriptors for $(fnt_family) $(fnt_size)pt
+// { [Char width in bits], [Offset into $(doc_name_ws)_bitmaps in bytes] }
+const FONT_CHAR_INFO $(doc_name_ws)_descriptors[] = {
+$(start_block_images_table)
+    {$(out_image_width), $(out_char_offset)} // '$(out_char_text)' #$(out_char_code)h
+    $(out_comma)
+$(end_block_images_table)
+};
+
+$(start_block_images_table)
+#ifndef FIRST_CHAR
+#define FIRST_CHAR '$(out_char_text)'
+#endif
+
+#ifdef LAST_CHAR
+#undef LAST_CHAR
+#endif
+
+#define LAST_CHAR '$(out_char_text)'
+
+#if (0x$(out_char_code) == 32)
+#define SPACE_WIDTH $(out_image_height)
+#endif
+$(end_block_images_table)
+
+// Space width by default.
+#ifndef SPACE_WIDTH
+#define SPACE_WIDTH 0
+#endif
+
+// Font information for $(fnt_family) $(fnt_size)pt
+FONT_INFO $(doc_name_ws)_FontInfo =
+{
+    $(out_images_max_height), // Character height
+    FIRST_CHAR,  // Start character
+    LAST_CHAR,   // End character
+    $(doc_name_ws)_descriptors, // Character descriptor array
+    $(doc_name_ws)_bitmaps,     // Character bitmap array
+};
+
+/*
+
+Header file:
+
+#ifndef $(doc_name_ws)_$(fnt_size)pt_H
+#define $(doc_name_ws)_$(fnt_size)pt_H
+
+// Font data for $(fnt_family) $(fnt_size)pt
+extern FONT_INFO $(doc_name_ws)_FontInfo;
+
+#endif // $(doc_name_ws)_$(fnt_size)pt_H
+*/

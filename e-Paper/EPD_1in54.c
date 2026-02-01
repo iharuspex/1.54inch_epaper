@@ -37,6 +37,30 @@
 ******************************************************************************/
 #include "EPD_1in54.h"
 #include "Debug.h"
+#include "epaper.h"
+
+// EPD1IN54 commands
+#define DRIVER_OUTPUT_CONTROL                       0x01
+#define BOOSTER_SOFT_START_CONTROL                  0x0C
+#define GATE_SCAN_START_POSITION                    0x0F
+#define DEEP_SLEEP_MODE                             0x10
+#define DATA_ENTRY_MODE_SETTING                     0x11
+#define SW_RESET                                    0x12
+#define TEMPERATURE_SENSOR_CONTROL                  0x1A
+#define MASTER_ACTIVATION                           0x20
+#define DISPLAY_UPDATE_CONTROL_1                    0x21
+#define DISPLAY_UPDATE_CONTROL_2                    0x22
+#define WRITE_RAM                                   0x24
+#define WRITE_VCOM_REGISTER                         0x2C
+#define WRITE_LUT_REGISTER                          0x32
+#define SET_DUMMY_LINE_PERIOD                       0x3A
+#define SET_GATE_TIME                               0x3B
+#define BORDER_WAVEFORM_CONTROL                     0x3C
+#define SET_RAM_X_ADDRESS_START_END_POSITION        0x44
+#define SET_RAM_Y_ADDRESS_START_END_POSITION        0x45
+#define SET_RAM_X_ADDRESS_COUNTER                   0x4E
+#define SET_RAM_Y_ADDRESS_COUNTER                   0x4F
+#define TERMINATE_FRAME_READ_WRITE                  0xFF
 
 const unsigned char lut_full_update[] = {
     0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22,
@@ -67,7 +91,7 @@ static void EPD_Reset(void)
     DEV_Digital_Write(EPD_RST_PIN, 1);
     DEV_Delay_ms(200);
     DEV_Digital_Write(EPD_RST_PIN, 0);
-    DEV_Delay_ms(200);
+    DEV_Delay_ms(2);
     DEV_Digital_Write(EPD_RST_PIN, 1);
     DEV_Delay_ms(200);
 }
@@ -158,10 +182,22 @@ static void EPD_TurnOnDisplay(void)
 }
 
 /******************************************************************************
+function :	Set the look-up table register
+parameter:
+******************************************************************************/
+static void EPD_SetLut(const UBYTE *lut)
+{
+    EPD_SendCommand(WRITE_LUT_REGISTER);
+    for (UWORD i = 0; i < 30; i++) {
+        EPD_SendData(lut[i]);
+    }
+}
+
+/******************************************************************************
 function :	Initialize the e-Paper register
 parameter:
 ******************************************************************************/
-UBYTE EPD_Init(const unsigned char* lut)
+UBYTE EPD_Init(UBYTE Mode)
 {
     EPD_Reset();
 
@@ -182,11 +218,16 @@ UBYTE EPD_Init(const unsigned char* lut)
     EPD_SendCommand(DATA_ENTRY_MODE_SETTING);
     EPD_SendData(0x03);
 
-    //set the look-up table register
-    EPD_SendCommand(WRITE_LUT_REGISTER);
-    for (UWORD i = 0; i < 30; i++) {
-        EPD_SendData(lut[i]);
+    // set the look-up table register
+    if (Mode == EPD_MODE_FULL_UPDATE) {
+        EPD_SetLut(lut_full_update);
+    } else if (Mode == EPD_MODE_PARTIAL_UPDATE) {
+        EPD_SetLut(lut_partial_update);
+    } else {
+        Debug("error: wrong init mode\r\n");
+        return -1;
     }
+
     return 0;
 }
 
@@ -221,7 +262,6 @@ void EPD_Display(const UBYTE *Image)
     Height = EPD_HEIGHT;
 
     UDOUBLE Addr = 0;
-    // UDOUBLE Offset = ImageName;
     EPD_SetWindows(0, 0, EPD_WIDTH, EPD_HEIGHT);
     for (UWORD j = 0; j < Height; j++) {
         EPD_SetCursor(0, j);
@@ -242,5 +282,4 @@ void EPD_Sleep(void)
 {
     EPD_SendCommand(DEEP_SLEEP_MODE);
     EPD_SendData(0x01);
-    // EPD_WaitUntilIdle();
 }
