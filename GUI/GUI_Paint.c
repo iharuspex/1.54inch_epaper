@@ -26,11 +26,11 @@
 *    Can display Chinese(GB1312)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documnetation files (the "Software"), to deal
+* of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to  whom the Software is
-* furished to do so, subject to the following conditions:
+* furnished to do so, subject to the following conditions:
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
@@ -44,13 +44,11 @@
 * THE SOFTWARE.
 *
 ******************************************************************************/
+#include <stdint.h>
+
 #include "GUI_Paint.h"
 #include "epaper.h"
 #include "Debug.h"
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h> //memset()
-#include <math.h>
 
 PAINT Paint;
 /******************************************************************************
@@ -70,8 +68,7 @@ void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD
     Paint.Color = Color;
     Paint.WidthByte = (Width % 8 == 0)? (Width / 8 ): (Width / 8 + 1);
     Paint.HeightByte = Height;
-    //printf("WidthByte = %d, HeightByte = %d\r\n", Paint.WidthByte, Paint.HeightByte);
-    //printf(" EPD_WIDTH / 8 = %d\r\n",  122 / 8);
+    Debug("WidthByte = %d, HeightByte = %d\r\n", Paint.WidthByte, Paint.HeightByte);
 
     Paint.Rotate = Rotate;
     Paint.Mirror = MIRROR_NONE;
@@ -98,7 +95,7 @@ void Paint_SelectImage(UBYTE *image)
 /******************************************************************************
 function:	Select Image Rotate
 parameter:
-    Rotate   :   0,90,180,270
+    Rotate   :   0, 90, 180, 270
 ******************************************************************************/
 void Paint_SetRotate(UWORD Rotate)
 {
@@ -106,14 +103,14 @@ void Paint_SetRotate(UWORD Rotate)
         Debug("Set image Rotate %d\r\n", Rotate);
         Paint.Rotate = Rotate;
     } else {
-        Debug("rotate = 0, 90, 180, 270\r\n");
+        Debug("error, possible rotate values: 0, 90, 180, 270\r\n");
     }
 }
 
 /******************************************************************************
 function:	Select Image mirror
 parameter:
-    mirror   :       Not mirror,Horizontal mirror,Vertical mirror,Origin mirror
+    mirror   :   Not mirror, Horizontal mirror, Vertical mirror, Origin mirror
 ******************************************************************************/
 void Paint_SetMirroring(UBYTE mirror)
 {
@@ -188,10 +185,11 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
 
     UDOUBLE Addr = X / 8 + Y * Paint.WidthByte;
     UBYTE Rdata = Paint.Image[Addr];
-    if(Color == BLACK)
+    if (Color == BLACK) {
         Paint.Image[Addr] = Rdata & ~(0x80 >> (X % 8));
-    else
+    } else {
         Paint.Image[Addr] = Rdata | (0x80 >> (X % 8));
+    }
 }
 
 /******************************************************************************
@@ -202,7 +200,7 @@ parameter:
 void Paint_Clear(UWORD Color)
 {
     for (UWORD Y = 0; Y < Paint.HeightByte; Y++) {
-        for (UWORD X = 0; X < Paint.WidthByte; X++ ) {//8 pixel =  1 byte
+        for (UWORD X = 0; X < Paint.WidthByte; X++ ) { //8 pixel = 1 byte
             UDOUBLE Addr = X + Y*Paint.WidthByte;
             Paint.Image[Addr] = Color;
         }
@@ -221,7 +219,7 @@ void Paint_ClearWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWOR
 {
     UWORD X, Y;
     for (Y = Ystart; Y < Yend; Y++) {
-        for (X = Xstart; X < Xend; X++) {//8 pixel =  1 byte
+        for (X = Xstart; X < Xend; X++) { // 8 pixel = 1 byte
             Paint_SetPixel(X, Y, Color);
         }
     }
@@ -288,15 +286,15 @@ void Paint_DrawLine(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend,
     int XAddway = Xstart < Xend ? 1 : -1;
     int YAddway = Ystart < Yend ? 1 : -1;
 
-    //Cumulative error
+    // Cumulative error
     int Esp = dx + dy;
     char Dotted_Len = 0;
 
     for (;;) {
         Dotted_Len++;
-        //Painted dotted line, 2 point is really virtual
+        // Painted dotted line, 2 point is really virtual
         if (Line_Style == LINE_STYLE_DOTTED && Dotted_Len % 3 == 0) {
-            //Debug("LINE_DOTTED\r\n");
+            Debug("LINE_DOTTED\r\n");
             Paint_DrawPoint(Xpoint, Ypoint, IMAGE_BACKGROUND, Dot_Pixel, DOT_STYLE_DFT);
             Dotted_Len = 0;
         } else {
@@ -367,17 +365,17 @@ void Paint_DrawCircle(UWORD X_Center, UWORD Y_Center, UWORD Radius,
         return;
     }
 
-    //Draw a circle from(0, R) as a starting point
+    // Draw a circle from(0, R) as a starting point
     int16_t XCurrent, YCurrent;
     XCurrent = 0;
     YCurrent = Radius;
 
-    //Cumulative error,judge the next point of the logo
+    // Cumulative error,judge the next point of the logo
     int16_t Esp = 3 - (Radius << 1 );
 
     int16_t sCountY;
     if (Draw_Fill == DRAW_FILL_FULL) {
-        while (XCurrent <= YCurrent ) { //Realistic circles
+        while (XCurrent <= YCurrent ) { // Realistic circles
             for (sCountY = XCurrent; sCountY <= YCurrent; sCountY ++ ) {
                 Paint_DrawPoint(X_Center + XCurrent, Y_Center + sCountY, Color, DOT_PIXEL_DFT, DOT_STYLE_DFT);//1
                 Paint_DrawPoint(X_Center - XCurrent, Y_Center + sCountY, Color, DOT_PIXEL_DFT, DOT_STYLE_DFT);//2
@@ -396,7 +394,7 @@ void Paint_DrawCircle(UWORD X_Center, UWORD Y_Center, UWORD Radius,
             }
             XCurrent ++;
         }
-    } else { //Draw a hollow circle
+    } else { // Draw a hollow circle
         while (XCurrent <= YCurrent ) {
             Paint_DrawPoint(X_Center + XCurrent, Y_Center + YCurrent, Color, Dot_Pixel, DOT_STYLE_DFT);//1
             Paint_DrawPoint(X_Center - XCurrent, Y_Center + YCurrent, Color, Dot_Pixel, DOT_STYLE_DFT);//2
@@ -469,7 +467,7 @@ parameter:
 */
 
 
-void Paint_DrawChar_notmono(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
+void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
                             FONT_INFO* Font, UWORD Color_Background, UWORD Color_Foreground)
 {
     UWORD Page, Column;
@@ -479,16 +477,16 @@ void Paint_DrawChar_notmono(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
         return;
     }
 
-    uint8_t width = CHAR_WIDTH(Acsii_Char);                    // Get character width
-    uint8_t height = Font->Height;                             // Get character height
+    uint8_t width = CHAR_WIDTH(Acsii_Char);  // Get character width
+    uint8_t height = Font->Height;           // Get character height
 
     const unsigned char *ptr = CHAR_DATA(Acsii_Char);
 
     for (Page = 0; Page < height; Page ++ ) {
         for (Column = 0; Column < width; Column ++ ) {
 
-            //To determine whether the font background color and screen background color is consistent
-            if (FONT_BACKGROUND == Color_Background) { //this process is to speed up the scan
+            // To determine whether the font background color and screen background color is consistent
+            if (FONT_BACKGROUND == Color_Background) { // this process is to speed up the scan
                 if (*ptr & (0x80 >> (Column % 8)))
                     Paint_SetPixel(Xpoint + Column, Ypoint + Page, Color_Foreground);
                 // Paint_DrawPoint(Xpoint + Column, Ypoint + Page, Color_Foreground, DOT_PIXEL_DFT, DOT_STYLE_DFT);
@@ -501,17 +499,18 @@ void Paint_DrawChar_notmono(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
                     // Paint_DrawPoint(Xpoint + Column, Ypoint + Page, Color_Background, DOT_PIXEL_DFT, DOT_STYLE_DFT);
                 }
             }
-            //One pixel is 8 bits
+            // One pixel is 8 bits
             if (Column % 8 == 7)
                 ptr++;
         }// Write a line
         if (width % 8 != 0)
             ptr++;
-    }// Write all
+    } // Write all
 }
 
-void Paint_DrawString_EN_notmono(UWORD Xstart, UWORD Ystart, const char * pString,
-                                 FONT_INFO* Font, UWORD Color_Background, UWORD Color_Foreground, uint8_t char_width)
+void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString,
+                                 FONT_INFO* Font,
+                                 UWORD Color_Background, UWORD Color_Foreground, uint8_t char_width)
 {
     UWORD Xpoint = Xstart;
     UWORD Ypoint = Ystart;
@@ -522,7 +521,7 @@ void Paint_DrawString_EN_notmono(UWORD Xstart, UWORD Ystart, const char * pStrin
     }
 
     while (* pString != '\0') {
-        //if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
+        // if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
         if ((Xpoint + char_width ) > Paint.Width ) {
             Xpoint = Xstart;
             Ypoint += Font->Height;
@@ -533,12 +532,12 @@ void Paint_DrawString_EN_notmono(UWORD Xstart, UWORD Ystart, const char * pStrin
             Xpoint = Xstart;
             Ypoint = Ystart;
         }
-        Paint_DrawChar_notmono(Xpoint, Ypoint, *pString, Font, Color_Background, Color_Foreground);
+        Paint_DrawChar(Xpoint, Ypoint, *pString, Font, Color_Background, Color_Foreground);
 
-        //The next word of the abscissa increases the font of the broadband
+        // The next word of the abscissa increases the font of the broadband
         Xpoint += CHAR_WIDTH(*pString) + CHAR_SPACE;
 
-        //The next character of the address
+        // The next character of the address
         pString ++;
     }
 }
@@ -765,7 +764,7 @@ void Paint_DrawBitMap(const unsigned char* image_buffer)
     UDOUBLE Addr = 0;
 
     for (y = 0; y < Paint.HeightByte; y++) {
-        for (x = 0; x < Paint.WidthByte; x++) {//8 pixel =  1 byte
+        for (x = 0; x < Paint.WidthByte; x++) { // 8 pixel = 1 byte
             Addr = x + y * Paint.WidthByte;
             Paint.Image[Addr] = (unsigned char)image_buffer[Addr];
         }
